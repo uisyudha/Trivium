@@ -146,6 +146,10 @@ def main():
         cipher = '0b' + ''.join(str(i) for i in cipher)
         cipher = BitArray(cipher)
     else:
+        print '{:<15}{:<2}{:<10}\n'.format('CIPHER TEXT', '=', args.M)
+        print '{: ^15}{: ^15}{: ^15}{: ^15}{: ^15}'.format('INPUT', 'CIPHER TEXT', 'KEYSTREAM', 'PLAIN TEXT', 'OUTPUT')
+        print '{:->75}'.format(' ')
+        print 'Not yet implemented'
         pass
     
 if __name__ == "__main__":

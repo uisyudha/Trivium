@@ -110,18 +110,6 @@ def main():
     hex_keystream = BitArray(hex_keystream)
     hex_keystream.byteswap()
     print "Keystream : ", hex_keystream.hex.upper()
-
-    if len(sys.argv) == 4:
-        #print sys.argv
-        print '{: ^15}{: ^15}{: ^15}{: ^15}{: ^15}'.format('INPUT', 'PLAIN TEXT', 'KEYSTREAM', 'CIPHER TEXT', 'OUTPUT')
-        print '{:->75}'.format(' ')
-        print '{: ^15}{: ^15}{: ^15}{: ^15}{: ^15}'.format('0xff', '11111111', '11111111', '11111111', '0xff')
-    else:
-        print "Usage: python trivium.py <KEY> <IV> <TEXT>"
-        print "     KEY     An 80 bit key, with the first bit to be used on the left"
-        print "     IV      An 80 bit initialization vector, with the first bit to be used on the left."
-        print "     TEXT    The plaintext to be encrypted."
-        print "Example: python trivium.py 0x80000000000000000000 0x00000000000000000000 abcd"
     """
     parser = argparse.ArgumentParser(description='Decryption or encryption using Trivium stream cipher.',
         epilog="trivium.py -m e -k 0x80000000000000000000 -iv 0x00000000000000000000 ABCD")
@@ -159,9 +147,6 @@ def main():
         cipher = BitArray(cipher)
     else:
         pass
-    
- 
-
     
 if __name__ == "__main__":
     main()

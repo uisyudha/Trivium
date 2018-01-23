@@ -3,6 +3,7 @@
 from collections import deque
 from itertools import repeat
 from bitstring import BitArray
+import argparse
 
 class Trivium:
     def __init__(self, key, iv):
@@ -41,7 +42,7 @@ class Trivium:
         t_3 = t_3 ^ self.state[285] & self.state[286] ^ self.state[68]
 
         
-        self.state.rotate(1)
+        self.state.rotate()
 
         self.state[0] = t_3
         self.state[93] = t_1
@@ -62,14 +63,36 @@ class Trivium:
         
     
     def encrypt(self, msg):
-        # Enkripsi msg dengan keystream
-        pass
+        all_chiper = []
+
+        for i in range(len(msg)):
+            hex_plain = hex(ord(msg[i]))
+            
+            keystream = self.keystream(8)
+            keystream = '0b' + ''.join(str(i) for i in keystream[::-1])
+            keystream = BitArray(keystream)
+            keystream.byteswap()
+            
+            plain = BitArray(hex_plain)
+            plain.byteswap()
+
+            cipher = [x ^ y for x, y in zip(map(int, list(plain)), map(int, list(keystream)))]
+            all_chiper += cipher
+
+            cipher = '0b' + ''.join(str(i) for i in cipher)
+            cipher = BitArray(cipher)
+            cipher.byteswap()
+
+            print '{: ^15}{: ^15}{: ^15}{: ^15}{:^15}'.format(hex_plain, plain.bin, keystream.bin, cipher.bin, '0x' + cipher.hex.upper())
+
+        return all_chiper
 
     def decrypt(self, cipher):
         # Dekripsi
         pass
 
 def main():
+    """
     KEY = BitArray("0x80000000000000000000")
     print "Key : ", KEY.hex
     KEY.byteswap()
@@ -87,6 +110,57 @@ def main():
     hex_keystream = BitArray(hex_keystream)
     hex_keystream.byteswap()
     print "Keystream : ", hex_keystream.hex.upper()
+
+    if len(sys.argv) == 4:
+        #print sys.argv
+        print '{: ^15}{: ^15}{: ^15}{: ^15}{: ^15}'.format('INPUT', 'PLAIN TEXT', 'KEYSTREAM', 'CIPHER TEXT', 'OUTPUT')
+        print '{:->75}'.format(' ')
+        print '{: ^15}{: ^15}{: ^15}{: ^15}{: ^15}'.format('0xff', '11111111', '11111111', '11111111', '0xff')
+    else:
+        print "Usage: python trivium.py <KEY> <IV> <TEXT>"
+        print "     KEY     An 80 bit key, with the first bit to be used on the left"
+        print "     IV      An 80 bit initialization vector, with the first bit to be used on the left."
+        print "     TEXT    The plaintext to be encrypted."
+        print "Example: python trivium.py 0x80000000000000000000 0x00000000000000000000 abcd"
+    """
+    parser = argparse.ArgumentParser(description='Decryption or encryption using Trivium stream cipher.',
+        epilog="trivium.py -m e -k 0x80000000000000000000 -iv 0x00000000000000000000 ABCD")
+    parser.add_argument('-m', '--mode', type=str, choices=['e', 'd'],
+        help='Choose mode, e for encryption or d for decryption')
+    parser.add_argument('-k, --key', action='store', dest='key', type=str,
+        help='An 80 bit key e.g.: 0x0000000000000000')
+    parser.add_argument('-iv', action='store', dest='iv', type=str,
+        help='An 80 bit initialization vector e.g.: 0x0000000000000000')
+    parser.add_argument('M', help='Cipher text or plain text')
+
+    args = parser.parse_args()
+    
+    # Initialize Trivium
+    KEY = BitArray(args.key)
+    print '{:<15}{:<2}{:<10}'.format('KEY', '=', KEY.hex)
+    KEY.byteswap()
+    KEY = map(int, KEY.bin)
+
+    IV = BitArray(args.iv)
+    print '{:<15}{:<2}{:<10}'.format('IV', '=', IV.hex)
+    IV.byteswap()
+    IV = map(int, IV.bin)
+
+    trivium = Trivium(KEY, IV)
+
+    # Encryption mode
+    if args.mode == 'e':
+        print '{:<15}{:<2}{:<10}\n'.format('PLAIN TEXT', '=', args.M)
+        print '{: ^15}{: ^15}{: ^15}{: ^15}{: ^15}'.format('INPUT', 'PLAIN TEXT', 'KEYSTREAM', 'CIPHER TEXT', 'OUTPUT')
+        print '{:->75}'.format(' ')
+        
+        cipher = trivium.encrypt(args.M)
+        cipher = '0b' + ''.join(str(i) for i in cipher)
+        cipher = BitArray(cipher)
+    else:
+        pass
+    
+ 
 
     
 if __name__ == "__main__":
